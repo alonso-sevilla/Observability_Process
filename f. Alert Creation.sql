@@ -1,5 +1,5 @@
-call OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_creation('alonso.sevilla@wahlclipper.com','david.nelsen@wahlclipper.com');
-CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_creation(INFRA_EMAIL VARCHAR, CUSTOMER_EMAIL VARCHAR)
+call OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_creation('alonso.sevilla@wahlclipper.com','chris.newgard@wahlclipper.com','david.nelsen@wahlclipper.com');
+CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_creation(INFRA_EMAIL VARCHAR, INFRA_EMAIL2 VARCHAR, CUSTOMER_EMAIL VARCHAR)
       RETURNS STRING
       LANGUAGE JAVASCRIPT
       EXECUTE AS CALLER
@@ -10,6 +10,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_
     var version_schema = "setup_procedures_v1";
 
     var infra_email = INFRA_EMAIL;
+    var infra_email2 = INFRA_EMAIL2;
     var customer_email = CUSTOMER_EMAIL;
 
     var account_query = "SELECT CURRENT_ACCOUNT()";
@@ -40,7 +41,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_
         CREATE OR REPLACE NOTIFICATION INTEGRATION alert_infra
         TYPE=EMAIL
         ENABLED=TRUE
-        ALLOWED_RECIPIENTS=('` + infra_email + `', '` + customer_email + `');
+        ALLOWED_RECIPIENTS=('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `');
 
 
 
@@ -53,7 +54,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.child_alert_
         WHERE TIMESTAMP BETWEEN SNOWFLAKE.ALERT.LAST_SUCCESSFUL_SCHEDULED_TIME()
         AND SNOWFLAKE.ALERT.SCHEDULED_TIME()
         ))
-        THEN call OBSERVABILITY_SETUP.${version_schema}.EMAIL_LAST_RESULTS('` + infra_email + `', '` + customer_email + `', 'New Alerts on account `+account_name+`');
+        THEN call OBSERVABILITY_SETUP.${version_schema}.EMAIL_LAST_RESULTS('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `', 'New Alerts on account `+account_name+`');
 
         ALTER ALERT ALERT_NEW_ROWS RESUME;
 
