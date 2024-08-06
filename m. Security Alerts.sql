@@ -1,11 +1,12 @@
-CALL OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURITY_ALERT_CREATION('alonso.sevilla@wahlclipper.com','david.nelsen@wahlclipper.com');
-CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURITY_ALERT_CREATION(INFRA_EMAIL VARCHAR, CUSTOMER_EMAIL VARCHAR)
+CALL OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURITY_ALERT_CREATION('alonso.sevilla@wahlclipper.com','chris.newgard@wahlclipper.com','david.nelsen@wahlclipper.com');
+CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURITY_ALERT_CREATION(INFRA_EMAIL VARCHAR, INFRA_EMAIL2 VARCHAR, CUSTOMER_EMAIL VARCHAR)
       RETURNS STRING
       LANGUAGE JAVASCRIPT
       EXECUTE AS CALLER
     AS
     $$
     var infra_email = INFRA_EMAIL;
+    var infra_email2 = INFRA_EMAIL2;
   
     var customer_email = CUSTOMER_EMAIL;
 
@@ -52,7 +53,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURI
       ORDER BY 2
       ))
       THEN BEGIN 
-        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone logged in with accountadmin service role'); 
+        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone logged in with accountadmin service role'); 
         INSERT INTO `+ db_name+` (ACCOUNT, METRICNAME, SERVICEACCOUNT, TIMESTAMP ) 
         SELECT '`+account_name+`', 'SERVICE_ACCOUNT_LOGIN' ,'someone logged in with accountadmin service role: ' || A.GRANTEE_NAME, CURRENT_TIMESTAMP()
         FROM "SNOWFLAKE"."ACCOUNT_USAGE"."GRANTS_TO_USERS" A, 
@@ -118,7 +119,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURI
         ORDER BY 2
         ))
       THEN BEGIN 
-        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone logged in with an accountadmin, sysadmin or securityadmin role'); 
+        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone logged in with an accountadmin, sysadmin or securityadmin role'); 
         INSERT INTO `+ db_name+` (ACCOUNT, METRICNAME, ADMINLOGIN, TIMESTAMP ) 
         SELECT '`+account_name+`', 'ADMIN_LOGIN_ALERT' ,'someone logged in with an accountadmin, sysadmin or securityadmin role:  ' || A.GRANTEE_NAME, CURRENT_TIMESTAMP()
         FROM "SNOWFLAKE"."ACCOUNT_USAGE"."GRANTS_TO_USERS" A, 
@@ -175,7 +176,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURI
       HAVING MAX(END_TIME) < DATEADD(MONTH, -6, CURRENT_TIMESTAMP)
       ))
       THEN BEGIN 
-        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'a role has not been used in the last 6 month, please look into this'); 
+        CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'a role has not been used in the last 6 month, please look into this'); 
         INSERT INTO `+ db_name+` (ACCOUNT, METRICNAME, UNUSEDROLE, TIMESTAMP ) 
         SELECT '`+account_name+`', 'UNUSED_ROLE_ALERT' ,'a role has not been used in the last 6 month, please look into this  ' || ROLE_NAME, CURRENT_TIMESTAMP()
         FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
@@ -235,7 +236,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_SECURI
           ORDER BY 2
           ))
         THEN BEGIN 
-          CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone that is not in the allowed list logged in with an accountadmin, sysadmin or securityadmin role'); 
+          CALL SYSTEM$SEND_EMAIL('alert_infra', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `', 'New Security Alert on account `+account_name+`', 'someone that is not in the allowed list logged in with an accountadmin, sysadmin or securityadmin role'); 
           INSERT INTO `+ db_name+` (ACCOUNT, METRICNAME, NOTALLOWEDUSER, TIMESTAMP ) 
           SELECT '`+account_name+`', 'NOT_ALLOWED_ADMIN_LOGIN_ALERT' ,'someone that is not in the allowed list logged in with an accountadmin, sysadmin or securityadmin role:  ' || A.GRANTEE_NAME, CURRENT_TIMESTAMP()
           FROM "SNOWFLAKE"."ACCOUNT_USAGE"."GRANTS_TO_USERS" A, 
