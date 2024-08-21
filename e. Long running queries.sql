@@ -1,5 +1,16 @@
-call OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_RUNNING_QUERY_ALERT('alonso.sevilla@wahlclipper.com','chris.newgard@wahlclipper.com','david.nelsen@wahlclipper.com');
-CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_RUNNING_QUERY_ALERT(INFRA_EMAIL VARCHAR, INFRA_EMAIL2 VARCHAR, CUSTOMER_EMAIL VARCHAR)
+call OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_RUNNING_QUERY_ALERT(
+'alonso.sevilla@wahlclipper.com',
+'chris.newgard@wahlclipper.com',
+'david.nelsen@wahlclipper.com',
+'charlie.hawk@wahlclipper.com',
+'srirajkumar.vasudevan@wahlclipper.com');
+
+CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_RUNNING_QUERY_ALERT(
+INFRA_EMAIL VARCHAR, 
+INFRA_EMAIL2 VARCHAR, 
+CUSTOMER_EMAIL VARCHAR, 
+CUSTOMER_EMAIL2 VARCHAR, 
+CUSTOMER_EMAIL3 VARCHAR)
     RETURNS VARIANT
     LANGUAGE javascript
     EXECUTE AS CALLER
@@ -11,6 +22,8 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_R
     var infra_email = INFRA_EMAIL;
     var infra_email2 = INFRA_EMAIL2;
     var customer_email = CUSTOMER_EMAIL;
+    var customer_email2 = CUSTOMER_EMAIL2;
+    var customer_email3 = CUSTOMER_EMAIL3;
 
     var account_query = "SELECT CURRENT_ACCOUNT()";
     var statement = snowflake.createStatement({sqlText: account_query});
@@ -73,7 +86,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_R
                 FROM `+db_name+`.OBSERVABILITY_CORE.OBSERVABILITY_METRICS OB
                 WHERE QH.QUERYID = OB.QUERYID
                 AND QH.METRICNAME = OB.METRICNAME)))
-          THEN CALL SYSTEM$SEND_EMAIL('ALERT_INFRA', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `', 'NEW METRICS ALERT ON ACCOUNT `+account_name+`', 'THERES A QUERY RUNNING FOR 25% ABOVE THE THRESHOLD TIME');
+          THEN CALL SYSTEM$SEND_EMAIL('ALERT_INFRA', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `, ` + customer_email2 + `, ` + customer_email3 + `', 'NEW METRICS ALERT ON ACCOUNT `+account_name+`', 'THERES A QUERY RUNNING FOR 25% ABOVE THE THRESHOLD TIME');
           INSERT INTO OBSERVABILITY_MAINTENANCE.LOGGING_SCHEMA.LOGGING_TABLE
             VALUES ('CHILD_LONG_RUNNING_QUERY_ALERT','SUCCESS', CURRENT_TIMESTAMP(), '`+account_name+`');
           RETURN 'SUCCESS';
@@ -101,5 +114,5 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.SETUP_PROCEDURES_V1.CHILD_LONG_R
     var result2 = statement3.execute();
     result2.next();
     res2 = result2.getColumnValue(1);
-    return res1.concat(' ', res2) 
+    return res2
     $$;
