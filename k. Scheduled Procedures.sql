@@ -1,5 +1,18 @@
-CALL OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_SETUP('IE93671', 'alonso.sevilla@wahlclipper.com','chris.newgard@wahlclipper.com','david.nelsen@wahlclipper.com');
-CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_SETUP(FEDERATED_ACCOUNT_ID VARCHAR, INFRA_EMAIL VARCHAR, INFRA_EMAIL2 VARCHAR, CUSTOMER_EMAIL VARCHAR)
+CALL OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_SETUP(
+'IE93671', 
+'alonso.sevilla@wahlclipper.com',
+'chris.newgard@wahlclipper.com',
+'david.nelsen@wahlclipper.com',
+'srirajkumar.vasudevan@wahlclipper.com',
+'charlie.hawk@wahlclipper.com');
+
+CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_SETUP(
+FEDERATED_ACCOUNT_ID VARCHAR, 
+INFRA_EMAIL VARCHAR, 
+INFRA_EMAIL2 VARCHAR, 
+CUSTOMER_EMAIL VARCHAR, 
+CUSTOMER_EMAIL2 VARCHAR, 
+CUSTOMER_EMAIL3 VARCHAR)
           returns string
           language javascript
           execute as caller
@@ -13,9 +26,11 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_S
       var infra_email = INFRA_EMAIL;
       var infra_email2 = INFRA_EMAIL2;
       var customer_email = CUSTOMER_EMAIL;
+      var customer_email2 = CUSTOMER_EMAIL2;
+      var customer_email3 = CUSTOMER_EMAIL3;
 
       var harmfulKeywords = ['drop', 'create', 'alter', 'delete', 'replace', 'truncate', 'merge', ';'];
-      var inputsToCheck = [federated_account_id, infra_email, infra_email2, customer_email];
+      var inputsToCheck = [federated_account_id, infra_email, infra_email2, customer_email, customer_email2,customer_email3];
       var checkInputs = inputsToCheck.join(' ').toLowerCase();
 
       for (var i = 0; i < harmfulKeywords.length; i++) {
@@ -52,8 +67,8 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.CHILD_CRON_S
           CALL OBSERVABILITY_SETUP.${version_schema}.OBSERVABILITY_METRICS_CREATE_PROCEDURE();
           CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_${costing_db_name}_CREDITS_BY_QUERY_PROCEDURE();
           CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_${costing_db_name}_METRICS_CREATE_PROCEDURE();
-          CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_LONG_RUNNING_QUERY_ALERT ('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `');
-          CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_ALERT_CREATION('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `');
+          CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_LONG_RUNNING_QUERY_ALERT ('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `', '` + customer_email2 + `', '` + customer_email3 + `');
+          CALL OBSERVABILITY_SETUP.${version_schema}.CHILD_ALERT_CREATION('` + infra_email + `', '` + infra_email2 + `', '` + customer_email + `', '` + customer_email2 + `', '` + customer_email3 + `');
           INSERT INTO OBSERVABILITY_MAINTENANCE.LOGGING_SCHEMA.LOGGING_TABLE
           VALUES ('CHILD_CRON_SETUP','SUCCESS', CURRENT_TIMESTAMP(), '`+account_name+`');
           RETURN 'SUCCESSFULLY CREATED ALERT AND INTEGRATION';
