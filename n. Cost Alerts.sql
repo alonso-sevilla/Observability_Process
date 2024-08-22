@@ -134,7 +134,7 @@ CREATE OR REPLACE PROCEDURE OBSERVABILITY_SETUP.setup_procedures_v1.FEDERATED_CO
           HAVING CURRENT_COST > HISTORICAL_COST
         ))
         THEN BEGIN
-            CALL SYSTEM$SEND_EMAIL('slack_alert', 'alonso_sevilla@hakkoda.io', 'Thirty Day average storage Cost Alert', 'The total storage cost for the federated account has exceeded the thirty day historical average');
+            CALL SYSTEM$SEND_EMAIL('slack_alert', 'alonso.sevilla@wahlclipper.com', 'Thirty Day average storage Cost Alert', 'The total storage cost for the federated account has exceeded the thirty day historical average');
             INSERT INTO OBSERVABILITY.OBSERVABILITY_CORE.OBSERVABILITY_METRICS (ACCOUNT, METRICNAME, TIMESTAMP, STORAGECOST)
               WITH TODAY_STORAGE_BENCHMARK AS (
                 SELECT (MAX(NVL(A.DATABASE_STORAGE_PETABYTES, 0)*1000) + MAX(NVL(A.FAILSAFE_STORAGE_PETABYTES, 0) * 1000) + MAX(NVL(A.HYBRID_STORAGE_PETABYTES, 0) * 1000) + MAX(NVL(B.AVERAGE_STAGE_BYTES, 0) * 0.000000000001))*23 AS TOTAL_STORAGE_COST_DAY
