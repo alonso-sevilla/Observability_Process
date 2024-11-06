@@ -86,10 +86,13 @@ CUSTOMER_EMAIL3 VARCHAR)
                 FROM `+db_name+`.OBSERVABILITY_CORE.OBSERVABILITY_METRICS OB
                 WHERE QH.QUERYID = OB.QUERYID
                 AND QH.METRICNAME = OB.METRICNAME)))
-          THEN CALL SYSTEM$SEND_EMAIL('ALERT_INFRA', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `, ` + customer_email2 + `, ` + customer_email3 + `', 'NEW METRICS ALERT ON ACCOUNT `+account_name+`', 'THERES A QUERY RUNNING FOR 25% ABOVE THE THRESHOLD TIME');
-          INSERT INTO OBSERVABILITY_MAINTENANCE.LOGGING_SCHEMA.LOGGING_TABLE
-            VALUES ('CHILD_LONG_RUNNING_QUERY_ALERT','SUCCESS', CURRENT_TIMESTAMP(), '`+account_name+`');
-          RETURN 'SUCCESS';
+          THEN 
+          BEGIN
+              CALL SYSTEM$SEND_EMAIL('ALERT_INFRA', '` + infra_email + `, ` + infra_email2 + `, ` + customer_email + `, ` + customer_email2 + `, ` + customer_email3 + `', 'NEW METRICS ALERT ON ACCOUNT `+account_name+`', 'THERES A QUERY RUNNING FOR 25% ABOVE THE THRESHOLD TIME');
+              INSERT INTO OBSERVABILITY_MAINTENANCE.LOGGING_SCHEMA.LOGGING_TABLE
+                VALUES ('CHILD_LONG_RUNNING_QUERY_ALERT','SUCCESS', CURRENT_TIMESTAMP(), '`+account_name+`');
+              RETURN 'SUCCESS';
+          END;
           EXCEPTION
           WHEN STATEMENT_ERROR THEN
               LET ERROR_MESSAGE := CURRENT_TIMESTAMP()||SQLCODE || ': '||SQLERRM;
